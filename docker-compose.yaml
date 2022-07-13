@@ -28,4 +28,5 @@ services:
             - ./docker/php/php-cli.ini:/usr/local/etc/php/php-cli.ini:ro
             - ./:/app
         extra_hosts:
+            - it.mvd.ru:172.27.33.105
             - ${DATABASE_IP}:${DATABASE_IP}
