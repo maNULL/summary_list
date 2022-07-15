@@ -69,20 +69,20 @@ class CurrentSummaryList
     #[ORM\Column(type: 'string', length: 10, nullable: true)]
     private ?string $searchInitiator;
 
-    #[ORM\Column(type: 'text')]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $accidentMemo;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $takenMeasures;
 
-    public function getId(): ?int
+    public function getSummaryId(): ?int
     {
-        return $this->id;
+        return $this->summaryId;
     }
 
-    public function setId(int $id): self
+    public function setSummaryId(int $summaryId): self
     {
-        $this->id = $id;
+        $this->summaryId = $summaryId;
 
         return $this;
     }
@@ -116,7 +116,7 @@ class CurrentSummaryList
         return $this->accidentType;
     }
 
-    public function setAccidentType(string $accidentType): self
+    public function setAccidentType(?string $accidentType): self
     {
         $this->accidentType = $accidentType;
 
@@ -308,7 +308,7 @@ class CurrentSummaryList
         return $this->accidentMemo;
     }
 
-    public function setAccidentMemo(string $accidentMemo): self
+    public function setAccidentMemo(?string $accidentMemo): self
     {
         $this->accidentMemo = $accidentMemo;
 

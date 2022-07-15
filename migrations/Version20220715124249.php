@@ -38,7 +38,7 @@ final class Version20220715124249 extends AbstractMigration
                 registered_department VARCHAR2(255) NOT NULL,
                 case_number VARCHAR2(50) DEFAULT NULL NULL,
                 search_initiator VARCHAR2(10) DEFAULT NULL NULL,
-                accident_memo CLOB NOT NULL,
+                accident_memo CLOB DEFAULT NULL NULL,
                 taken_measures CLOB DEFAULT NULL NULL,
                 PRIMARY KEY(summary_id)
             )'
