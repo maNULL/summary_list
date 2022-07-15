@@ -36,6 +36,7 @@ class GetSummariesCommand extends Command
     /**
      * @throws GuzzleException
      * @throws Exception
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -51,87 +52,26 @@ class GetSummariesCommand extends Command
                 }
 
                 $io->success('You have a new command! Now make it your own! Pass --help to see your options.');*/
-        $io->note('Authentification start');
+        $io->note('Аутентификация...');
 
-        $this->authentication(
-            $this->parameterBag->get('sodch_username'),
-            $this->parameterBag->get('sodch_password')
-        );
+        $authCommand = $this->getApplication()->find('app:sodch:auth');
+        $returnCode  = $authCommand->run($input, $output);
+
+        if ($returnCode > 0) {
+            $io->error('Ошибка аутентификации!');
+
+            return Command::FAILURE;
+        }
 
         $io->note('Process start');
-
         $this->processCurrentSummaryList();
 
+        // Logout
+        $this->sodchClient->get(
+            'http://idp.sudis.mvd.ru/idp/Logout?logoutRedirectUrl=http://sodchm.it.mvd.ru/mvd'
+        );
+
         return Command::SUCCESS;
-    }
-
-    /**
-     * @throws GuzzleException
-     * @throws \Exception
-     */
-    private function authentication(string $username, string $password)
-    {
-        $content = $this
-            ->sodchClient
-            ->request('GET', '/mvd-server/sso')
-            ->getBody()
-            ->getContents();
-
-        if (preg_match("/name=\'SAMLRequest\' value=\'(.*?)\' \/>/si", $content, $result)) {
-            $this->sodchClient->request(
-                'GET',
-                'http://idp.sudis.mvd.ru/idp/profile/SAML2/POSTGOST/SSO',
-                [
-                    'query'   => ['SAMLRequest' => $result[1], 'RelayState' => '/mvd-server/sso'],
-                    'headers' => ['Content-Type' => 'application/x-www-form-urlencoded;'],
-                ]
-            );
-        } else {
-            throw new \Exception('Ошибка получение SAMLRequest');
-        }
-
-        $response = $this
-            ->sodchClient
-            ->request(
-                'POST',
-                'http://idp.sudis.mvd.ru/idp/api/login/password',
-                [
-                    'headers' => ['Accept: application/json', 'Content-Type: application/json'],
-                    'json'    => ['userLogin' => $username, 'userPassword' => $password],
-                ]
-            )
-            ->getBody()
-            ->getContents();
-
-        if (strlen($response) > 0) {
-            $json = json_decode($response, true);
-        } else {
-            throw new \Exception('Ошибка авторизации в СУДИС');
-        }
-
-        if (isset($json['code']) && is_null($json['synopsis'])) {
-            $content = $this
-                ->sodchClient
-                ->request('GET', 'http://idp.sudis.mvd.ru/idp/authentication')
-                ->getBody()
-                ->getContents();
-
-            if (preg_match("/name=\"SAMLResponse\" value=\"(.*?)\">/si", $content, $result)) {
-                $this->sodchClient->request(
-                    'POST',
-                    '/mvd-server/sso',
-                    [
-                        'form_params' => ['SAMLResponse' => $result[1], 'RelayState' => '/mvd-server/sso'],
-                    ]
-                );
-            } else {
-                throw new \Exception('Ошибка получение SAMLResponse');
-            }
-        } else {
-            throw new \Exception(
-                'В результате авторизации в ответе "code" отсутствует или Установлено значение для "synopsys"'
-            );
-        }
     }
 
     /**
@@ -225,14 +165,16 @@ class GetSummariesCommand extends Command
      */
     private function getSummaryListByDate(\DateTimeInterface $summaryDate): string
     {
+        $requestDate = $summaryDate->modify('midnight');
+
         $params = [
-            "startCreationDate"   => $summaryDate->modify('midnight')->format('c'),
-            "endCreationDate"     => $summaryDate->modify('+1 day -1 second')->format('c'),
+            "startCreationDate"   => $requestDate->format('c'),
+            "endCreationDate"     => $requestDate->modify('+1 day -1 second')->format('c'),
             "departmentId"        => -260001,
             "withChildDepartment" => false,
         ];
 
-        return $this
+        $c = $this
             ->sodchClient
             ->request(
                 'POST',
@@ -245,5 +187,9 @@ class GetSummariesCommand extends Command
             )
             ->getBody()
             ->getContents();
+
+        file_put_contents($summaryDate->format('Ymd').'.json', $c);
+
+        return $c;
     }
 }
