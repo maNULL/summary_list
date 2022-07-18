@@ -8,6 +8,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -58,27 +59,27 @@ class LoadSummariesCommand extends Command
 
         $io->note('Process start');
 
-        $processAllSummaryListCommand = $this->getApplication()->find('app:sodch:get-all-summaries');
-
-        if ($processAllSummaryListCommand->run($input, $output) > 0) {
-            $io->error('Ошибка загрузки summary list!');
-
-            return Command::FAILURE;
-        }
+//        $processAllSummaryListCommand = $this->getApplication()->find('app:sodch:get-all-summaries');
+//
+//        if ($processAllSummaryListCommand->run($input, $output) > 0) {
+//            $io->error('Ошибка загрузки summary list!');
+//
+//            return Command::FAILURE;
+//        }
 
 //        $diffIds = $this->connection->executeQuery('select SYMMARYID from SUMMARYLIST_DIFF order by SYMMARYID');
 //        foreach ($diffIds->iterateColumn() as $id) {
-//            $getSummaryByIdCommand = $this->getApplication()->find('app:sodch:get-summary-by-id');
-//
-//            $idInput = new ArrayInput(
-//                ['id' => $id]
-//            );
-//
-//            if ($getSummaryByIdCommand->run($idInput, $output) > 0) {
-//                $io->error(sprintf('Ошибка обработки записи сводки с ID=%s!', $id));
-//
-//                return Command::FAILURE;
-//            }
+        $getSummaryByIdCommand = $this->getApplication()->find('app:sodch:get-summary-by-id');
+
+        $idInput = new ArrayInput(
+            ['id' => 15718959]
+        );
+
+        if ($getSummaryByIdCommand->run($idInput, $output) > 0) {
+            $io->error(sprintf('Ошибка обработки записи сводки с ID=%s!', 15718959));
+
+            return Command::FAILURE;
+        }
 //        }
 
         // Logout
