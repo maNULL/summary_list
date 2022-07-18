@@ -74,6 +74,10 @@ class Summary
     #[ORM\OneToMany(mappedBy: 'summary', targetEntity: Person::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $persons;
 
+    #[ORM\ManyToOne(targetEntity: Address::class)]
+    #[ORM\JoinColumn(name: 'accident_address', referencedColumnName: 'address_id', nullable: true)]
+    private ?Address $accidentAddress;
+
     public function __construct()
     {
         $this->persons = new ArrayCollection();
@@ -333,6 +337,18 @@ class Summary
                 $person->setSummary(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAccidentAddress(): ?Address
+    {
+        return $this->accidentAddress;
+    }
+
+    public function setAccidentAddress(?Address $accidentAddress): self
+    {
+        $this->accidentAddress = $accidentAddress;
 
         return $this;
     }

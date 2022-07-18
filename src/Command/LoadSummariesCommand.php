@@ -72,7 +72,7 @@ class LoadSummariesCommand extends Command
         $getSummaryByIdCommand = $this->getApplication()->find('app:sodch:get-summary-by-id');
 
         $idInput = new ArrayInput(
-            ['id' => 15718959]
+            ['id' => 79971545]
         );
 
         if ($getSummaryByIdCommand->run($idInput, $output) > 0) {

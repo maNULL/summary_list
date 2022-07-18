@@ -28,11 +28,11 @@ class Person
     private DateTimeImmutable $birthDate;
 
     #[ORM\ManyToOne(targetEntity: Address::class)]
-    #[ORM\JoinColumn(name: 'address_id', referencedColumnName: 'id', nullable: true)]
+    #[ORM\JoinColumn(name: 'address_id', referencedColumnName: 'address_id', nullable: true)]
     private ?Address $address;
 
     #[ORM\ManyToOne(targetEntity: Summary::class, inversedBy: 'persons')]
-    #[ORM\JoinColumn(name: 'summary_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(name: 'summary_id', referencedColumnName: 'summary_id', nullable: false)]
     private ?Summary $summary;
 
     public function getId(): int

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Command\Sodch;
 
+use App\Entity\Address;
+use App\Entity\Person;
 use App\Entity\Summary;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception;
@@ -91,7 +93,53 @@ class SodchGetSummaryByIdCommand extends Command
                 ->setAccidentAddrExtraInfo($data['accidentAddrExtraInfo'])
                 ->setAccidentType($data['accidentType']);
 
+            if (! is_null($data['accidentAddress'])) {
+                $aa = (array) $data['accidentAddress'];
+
+                $accidentAddress = new Address();
+                $accidentAddress
+                    ->setId($aa['addressId'])
+                    ->setText($aa['addressText'])
+                    ->setFiasGuid($aa['fiasGuid'])
+                    ->setAptNumber($aa['aptNumber'])
+                    ->setHouse($aa['house']);
+
+                $this->entityManager->persist($accidentAddress);
+
+                $summary->setAccidentAddress($accidentAddress);
+            }
+
             $this->entityManager->persist($summary);
+
+            foreach ($data['persons'] as $p) {
+                $p = (array) $p;
+
+                $person = new Person();
+                $person
+                    ->setId($p['personId'])
+                    ->setLastName($p['lastName'])
+                    ->setFirstName($p['firstName'])
+                    ->setMiddleName($p['middleName'])
+                    ->setBirthDate(DateTimeImmutable::createFromFormat('d.m.Y', $p['birthDate']));
+
+                if (! is_null($p['address'])) {
+                    $a = (array) $p['address'];
+
+                    $address = new Address();
+                    $address
+                        ->setId($a['addressId'])
+                        ->setText($a['addressText'])
+                        ->setFiasGuid($a['fiasGuid'])
+                        ->setAptNumber($a['aptNumber'])
+                        ->setHouse($a['house']);
+
+                    $this->entityManager->persist($address);
+                    $person->setAddress($address);
+                }
+
+                $summary->addPerson($person);
+            }
+
             $this->entityManager->flush();
 
             $connection = $this->entityManager->getConnection();
@@ -202,7 +250,7 @@ class SodchGetSummaryByIdCommand extends Command
 //            }
 //            $this->connection->commit();
         } catch (\Throwable $e) {
-            dump($e->getMessage());
+            dump($e);
             dump($data);
             //$this->connection->rollBack();
         }
