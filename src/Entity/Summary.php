@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use App\Repository\SummaryRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SummaryRepository::class)]
@@ -68,6 +70,14 @@ class Summary
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $takenMeasures;
+
+    #[ORM\OneToMany(mappedBy: 'summary', targetEntity: Person::class, cascade: ['persist'], orphanRemoval: true)]
+    private Collection $persons;
+
+    public function __construct()
+    {
+        $this->persons = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -293,6 +303,36 @@ class Summary
     public function setTakenMeasures(?string $takenMeasures): Summary
     {
         $this->takenMeasures = $takenMeasures;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Person>
+     */
+    public function getPersons(): Collection
+    {
+        return $this->persons;
+    }
+
+    public function addPerson(Person $person): self
+    {
+        if (! $this->persons->contains($person)) {
+            $this->persons->add($person);
+            $person->setSummary($this);
+        }
+
+        return $this;
+    }
+
+    public function removePerson(Person $person): self
+    {
+        if ($this->persons->removeElement($person)) {
+            // set the owning side to null (unless already changed)
+            if ($person->getSummary() === $this) {
+                $person->setSummary(null);
+            }
+        }
 
         return $this;
     }
