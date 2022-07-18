@@ -6,6 +6,7 @@ namespace App\Command\Sodch;
 
 use App\Entity\Address;
 use App\Entity\Person;
+use App\Entity\Place;
 use App\Entity\Summary;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception;
@@ -107,6 +108,12 @@ class SodchGetSummaryByIdCommand extends Command
                 $this->entityManager->persist($accidentAddress);
 
                 $summary->setAccidentAddress($accidentAddress);
+
+                $coordinate = $this->getCoordinateByFiasGuid($aa['fiasGuid']);
+
+                $place = new Place($aa['fiasGuid'], ...$coordinate);
+
+                $this->entityManager->persist($place);
             }
 
             $this->entityManager->persist($summary);
@@ -266,5 +273,33 @@ class SodchGetSummaryByIdCommand extends Command
             'U',
             (string) intval($unixTime / 1000)
         );
+    }
+
+    private function getCoordinateByFiasGuid(string $fiasGuid): array
+    {
+        $response = $this->sodchClient->get(
+            '/mvd-server/address/findextension',
+            [
+                'query' => [
+                    '_dc'      => round(microtime(true) * 1000),
+                    'fiasGuid' => $fiasGuid,
+                ],
+            ]
+        );
+
+        $data = [];
+
+        $place = (array) json_decode($response->getBody()->getContents());
+
+        if (array_key_exists('data', $place)) {
+            $data = (array) $place['data'];
+
+            return [
+                'latitude'  => $data['latitude'],
+                'longitude' => $data['longitude'],
+            ];
+        }
+
+        return $data;
     }
 }
