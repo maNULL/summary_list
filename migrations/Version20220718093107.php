@@ -20,8 +20,8 @@ final class Version20220718093107 extends AbstractMigration
             '
             CREATE TABLE place (
                 fias_guid CHAR(36) NOT NULL,
-                latitude NUMERIC(10, 8) NOT NULL,
-                longitude NUMERIC(10, 8) NOT NULL,
+                latitude NUMERIC(10, 7) NOT NULL,
+                longitude NUMERIC(10, 7) NOT NULL,
                 PRIMARY KEY(fias_guid)
             )'
         );

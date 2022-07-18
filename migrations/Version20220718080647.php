@@ -22,10 +22,10 @@ final class Version20220718080647 extends AbstractMigration
                 person_id NUMBER(10) NOT NULL,
                 address_id NUMBER(10) DEFAULT NULL NULL,
                 summary_id NUMBER(10) NOT NULL,
-                last_name VARCHAR2(32) NOT NULL,
-                first_name VARCHAR2(32) NOT NULL,
-                middle_name VARCHAR2(32) NOT NULL,
-                birth_date DATE NOT NULL,
+                last_name VARCHAR2(32) DEFAULT NULL NULL,
+                first_name VARCHAR2(32) DEFAULT NULL NULL,
+                middle_name VARCHAR2(32) DEFAULT NULL NULL,
+                birth_date DATE DEFAULT NULL NULL,
                 PRIMARY KEY(person_id)
             )'
         );

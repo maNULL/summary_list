@@ -8,6 +8,8 @@ use App\Entity\Address;
 use App\Entity\Person;
 use App\Entity\Place;
 use App\Entity\Summary;
+use App\Repository\AddressRepository;
+use App\Repository\PlaceRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,7 +31,9 @@ class SodchGetSummaryByIdCommand extends Command
 {
     public function __construct(
         private readonly ClientInterface        $sodchClient,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly PlaceRepository        $placeRepository,
+        private readonly AddressRepository      $addressRepository
     )
     {
         parent::__construct();
@@ -82,7 +86,11 @@ class SodchGetSummaryByIdCommand extends Command
                 ->setSectionId($data['sectionId'])
                 ->setCrimeTypeId($data['crimeTypeId'])
                 ->setIncludeStatistics($data['includeStatistics'])
-                ->setIncludeStatisticsDate(new DateTimeImmutable($data['includeStatisticsDate']))
+                ->setIncludeStatisticsDate(
+                    $data['includeStatisticsDate'] === null
+                        ? null
+                        : new DateTimeImmutable($data['includeStatisticsDate'])
+                )
                 ->setCrimeTypeExtraInfo($data['crimeTypeExtraInfo'])
                 ->setCrimeTypeAtts($data['crimeTypeAtts'])
                 ->setAssignedDepartment($data['assignedDepartment'])
@@ -97,23 +105,18 @@ class SodchGetSummaryByIdCommand extends Command
             if (! is_null($data['accidentAddress'])) {
                 $aa = (array) $data['accidentAddress'];
 
-                $accidentAddress = new Address();
-                $accidentAddress
-                    ->setId($aa['addressId'])
-                    ->setText($aa['addressText'])
-                    ->setFiasGuid($aa['fiasGuid'])
-                    ->setAptNumber($aa['aptNumber'])
-                    ->setHouse($aa['house']);
+                $summary->setAccidentAddress($this->getAddress($aa));
 
-                $this->entityManager->persist($accidentAddress);
+                $place = $this->placeRepository->find($aa['fiasGuid']);
 
-                $summary->setAccidentAddress($accidentAddress);
+                if ($place === null) {
+                    $coordinate = $this->getCoordinateByFiasGuid($aa['fiasGuid']);
 
-                $coordinate = $this->getCoordinateByFiasGuid($aa['fiasGuid']);
-
-                $place = new Place($aa['fiasGuid'], ...$coordinate);
-
-                $this->entityManager->persist($place);
+                    if ($coordinate !== null) {
+                        $place = new Place($aa['fiasGuid'], ...$coordinate);
+                        $this->entityManager->persist($place);
+                    }
+                }
             }
 
             $this->entityManager->persist($summary);
@@ -127,21 +130,16 @@ class SodchGetSummaryByIdCommand extends Command
                     ->setLastName($p['lastName'])
                     ->setFirstName($p['firstName'])
                     ->setMiddleName($p['middleName'])
-                    ->setBirthDate(DateTimeImmutable::createFromFormat('d.m.Y', $p['birthDate']));
+                    ->setBirthDate(
+                        $p['birthDate'] === null
+                            ? null
+                            : DateTimeImmutable::createFromFormat('d.m.Y', $p['birthDate'])
+                    );
 
                 if (! is_null($p['address'])) {
                     $a = (array) $p['address'];
 
-                    $address = new Address();
-                    $address
-                        ->setId($a['addressId'])
-                        ->setText($a['addressText'])
-                        ->setFiasGuid($a['fiasGuid'])
-                        ->setAptNumber($a['aptNumber'])
-                        ->setHouse($a['house']);
-
-                    $this->entityManager->persist($address);
-                    $person->setAddress($address);
+                    $person->setAddress($this->getAddress($a));
                 }
 
                 $summary->addPerson($person);
@@ -257,8 +255,7 @@ class SodchGetSummaryByIdCommand extends Command
 //            }
 //            $this->connection->commit();
         } catch (\Throwable $e) {
-            dump($e);
-            dump($data);
+            dd([$e, $data]);
             //$this->connection->rollBack();
         }
     }
@@ -275,7 +272,26 @@ class SodchGetSummaryByIdCommand extends Command
         );
     }
 
-    private function getCoordinateByFiasGuid(string $fiasGuid): array
+    private function getAddress(array $a): ?Address
+    {
+        $address = $this->addressRepository->find($a['addressId']);
+
+        if ($address === null) {
+            $address = new Address();
+            $address
+                ->setId($a['addressId'])
+                ->setText($a['addressText'])
+                ->setFiasGuid($a['fiasGuid'])
+                ->setAptNumber($a['aptNumber'])
+                ->setHouse($a['house']);
+
+            $this->entityManager->persist($address);
+        }
+
+        return $address;
+    }
+
+    private function getCoordinateByFiasGuid(string $fiasGuid): ?array
     {
         $response = $this->sodchClient->get(
             '/mvd-server/address/findextension',
@@ -287,12 +303,14 @@ class SodchGetSummaryByIdCommand extends Command
             ]
         );
 
-        $data = [];
-
         $place = (array) json_decode($response->getBody()->getContents());
 
         if (array_key_exists('data', $place)) {
             $data = (array) $place['data'];
+
+            if ($data['latitude'] === null || $data['longitude'] === null) {
+                return null;
+            }
 
             return [
                 'latitude'  => $data['latitude'],
@@ -300,6 +318,6 @@ class SodchGetSummaryByIdCommand extends Command
             ];
         }
 
-        return $data;
+        return null;
     }
 }

@@ -23,7 +23,7 @@ final class Version20220718073619 extends AbstractMigration
                 address_text VARCHAR2(1000) DEFAULT NULL NULL,
                 fias_guid CHAR(36) DEFAULT NULL NULL,
                 apt_number VARCHAR2(10) DEFAULT NULL NULL,
-                house NUMBER(1) NOT NULL,
+                house NUMBER(1) DEFAULT NULL,
                 PRIMARY KEY(address_id)
             )'
         );

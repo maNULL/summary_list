@@ -15,17 +15,17 @@ class Person
     #[ORM\Column(name: 'person_id', type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'string', length: 32)]
-    private string $lastName;
+    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    private ?string $lastName;
 
-    #[ORM\Column(type: 'string', length: 32)]
-    private string $firstName;
+    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    private ?string $firstName;
 
-    #[ORM\Column(type: 'string', length: 32)]
-    private string $middleName;
+    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    private ?string $middleName;
 
-    #[ORM\Column(type: 'date_immutable')]
-    private DateTimeImmutable $birthDate;
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?DateTimeImmutable $birthDate;
 
     #[ORM\ManyToOne(targetEntity: Address::class)]
     #[ORM\JoinColumn(name: 'address_id', referencedColumnName: 'address_id', nullable: true)]
@@ -52,7 +52,7 @@ class Person
         return $this->lastName;
     }
 
-    public function setLastName(string $lastName): self
+    public function setLastName(?string $lastName): self
     {
         $this->lastName = $lastName;
 
@@ -64,7 +64,7 @@ class Person
         return $this->firstName;
     }
 
-    public function setFirstName(string $firstName): self
+    public function setFirstName(?string $firstName): self
     {
         $this->firstName = $firstName;
 
@@ -76,7 +76,7 @@ class Person
         return $this->middleName;
     }
 
-    public function setMiddleName(string $middleName): self
+    public function setMiddleName(?string $middleName): self
     {
         $this->middleName = $middleName;
 
@@ -88,7 +88,7 @@ class Person
         return $this->birthDate;
     }
 
-    public function setBirthDate(DateTimeImmutable $birthDate): self
+    public function setBirthDate(?DateTimeImmutable $birthDate): self
     {
         $this->birthDate = $birthDate;
 

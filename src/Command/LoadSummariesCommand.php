@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use Doctrine\DBAL\Connection;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,8 +21,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class LoadSummariesCommand extends Command
 {
     public function __construct(
-        private readonly ClientInterface $sodchClient
-
+        private readonly ClientInterface $sodchClient,
+        private readonly Connection      $connection,
     )
     {
         parent::__construct();
@@ -57,8 +58,8 @@ class LoadSummariesCommand extends Command
             return Command::FAILURE;
         }
 
-        $io->note('Process start');
-
+//        $io->note('Process start');
+//
 //        $processAllSummaryListCommand = $this->getApplication()->find('app:sodch:get-all-summaries');
 //
 //        if ($processAllSummaryListCommand->run($input, $output) > 0) {
@@ -67,20 +68,23 @@ class LoadSummariesCommand extends Command
 //            return Command::FAILURE;
 //        }
 
-//        $diffIds = $this->connection->executeQuery('select SYMMARYID from SUMMARYLIST_DIFF order by SYMMARYID');
-//        foreach ($diffIds->iterateColumn() as $id) {
-        $getSummaryByIdCommand = $this->getApplication()->find('app:sodch:get-summary-by-id');
+        $diffIds = $this->connection->executeQuery('select summary_id from summaries_diff order by summary_id');
 
-        $idInput = new ArrayInput(
-            ['id' => 79971545]
-        );
+        $io->note('Process start by ID');
 
-        if ($getSummaryByIdCommand->run($idInput, $output) > 0) {
-            $io->error(sprintf('Ошибка обработки записи сводки с ID=%s!', 15718959));
+        foreach ($diffIds->iterateColumn() as $id) {
+            $getSummaryByIdCommand = $this->getApplication()->find('app:sodch:get-summary-by-id');
 
-            return Command::FAILURE;
+            $idInput = new ArrayInput(
+                ['id' => $id]
+            );
+
+            if ($getSummaryByIdCommand->run($idInput, $output) > 0) {
+                $io->error(sprintf('Ошибка обработки записи сводки с ID=%s!', $id));
+
+                return Command::FAILURE;
+            }
         }
-//        }
 
         // Logout
         $this->sodchClient->get(

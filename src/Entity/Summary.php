@@ -17,29 +17,29 @@ class Summary
     #[ORM\Column(name: 'summary_id', type: 'integer')]
     private ?int $id;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $kuspId;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $departmentId;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $sectionId;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $crimeTypeId;
 
     #[ORM\Column(type: 'boolean')]
     private bool $includeStatistics;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
     private ?DateTimeImmutable $includeStatisticsDate;
 
     #[ORM\Column(type: 'string', length: 1000, nullable: true)]
     private ?string $crimeTypeExtraInfo;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
-    private ?string $crimeTypeAtts;
+    #[ORM\Column(type: 'array', nullable: true)]
+    private ?array $crimeTypeAtts;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $assignedDepartment;
@@ -63,7 +63,7 @@ class Summary
     private ?string $accidentAddrExtraInfo;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private string $accidentType;
+    private ?string $accidentType;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $accidentMemo;
@@ -88,7 +88,7 @@ class Summary
         return $this->id;
     }
 
-    public function setId(?int $id): Summary
+    public function setId(int $id): Summary
     {
         $this->id = $id;
 
@@ -179,12 +179,12 @@ class Summary
         return $this;
     }
 
-    public function getCrimeTypeAtts(): ?string
+    public function getCrimeTypeAtts(): ?array
     {
         return $this->crimeTypeAtts;
     }
 
-    public function setCrimeTypeAtts(?string $crimeTypeAtts): Summary
+    public function setCrimeTypeAtts(?array $crimeTypeAtts): self
     {
         $this->crimeTypeAtts = $crimeTypeAtts;
 

@@ -14,10 +14,10 @@ class Place
     #[ORM\Column(type: 'guid')]
     public readonly string $fiasGuid;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 7)]
     public readonly string $latitude;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 7)]
     public readonly string $longitude;
 
     public function __construct(string $fiasGuid, string $latitude, string $longitude)
