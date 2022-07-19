@@ -23,22 +23,12 @@ class MapElementRepository extends ServiceEntityRepository
         parent::__construct($registry, MapElement::class);
     }
 
-    public function add(MapElement $entity, bool $flush = false): void
+    public function getCrimes(): array
     {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(MapElement $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+        return $this->createQueryBuilder('m')
+                    ->select('m.id', 'm.latitude', 'm.longitude')
+                    ->getQuery()
+                    ->getResult();
     }
 
 //    /**
