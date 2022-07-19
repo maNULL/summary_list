@@ -58,15 +58,15 @@ class LoadSummariesCommand extends Command
             return Command::FAILURE;
         }
 
-//        $io->note('Process start');
-//
-//        $processAllSummaryListCommand = $this->getApplication()->find('app:sodch:get-all-summaries');
-//
-//        if ($processAllSummaryListCommand->run($input, $output) > 0) {
-//            $io->error('Ошибка загрузки summary list!');
-//
-//            return Command::FAILURE;
-//        }
+        $io->note('Process start');
+
+        $processAllSummaryListCommand = $this->getApplication()->find('app:sodch:get-all-summaries');
+
+        if ($processAllSummaryListCommand->run($input, $output) > 0) {
+            $io->error('Ошибка загрузки summary list!');
+
+            return Command::FAILURE;
+        }
 
         $diffIds = $this->connection->executeQuery('select summary_id from summaries_diff order by summary_id');
 
@@ -78,6 +78,8 @@ class LoadSummariesCommand extends Command
             $idInput = new ArrayInput(
                 ['id' => $id]
             );
+
+            $io->note(sprintf('Обработка записи с id = %s', $id));
 
             if ($getSummaryByIdCommand->run($idInput, $output) > 0) {
                 $io->error(sprintf('Ошибка обработки записи сводки с ID=%s!', $id));

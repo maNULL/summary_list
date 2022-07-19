@@ -17,6 +17,10 @@ class Summary
     #[ORM\Column(name: 'summary_id', type: 'integer')]
     private ?int $id;
 
+    #[ORM\OneToOne(targetEntity: SummaryList::class)]
+    #[ORM\JoinColumn(name: 'summary_id', referencedColumnName: 'summary_id', nullable: false, onDelete: 'CASCADE')]
+    private ?SummaryList $summaryList;
+
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $kuspId;
 
@@ -71,7 +75,11 @@ class Summary
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $takenMeasures;
 
-    #[ORM\OneToMany(mappedBy: 'summary', targetEntity: Person::class, cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OneToMany(
+        mappedBy    : 'summary',
+        targetEntity: Person::class,
+        cascade     : ['persist'])
+    ]
     private Collection $persons;
 
     #[ORM\ManyToOne(targetEntity: Address::class)]
@@ -91,6 +99,18 @@ class Summary
     public function setId(int $id): Summary
     {
         $this->id = $id;
+
+        return $this;
+    }
+
+    public function getSummaryList(): ?SummaryList
+    {
+        return $this->summaryList;
+    }
+
+    public function setSummaryList(SummaryList $summaryList): self
+    {
+        $this->summaryList = $summaryList;
 
         return $this;
     }

@@ -32,7 +32,7 @@ class Person
     private ?Address $address;
 
     #[ORM\ManyToOne(targetEntity: Summary::class, inversedBy: 'persons')]
-    #[ORM\JoinColumn(name: 'summary_id', referencedColumnName: 'summary_id', nullable: false)]
+    #[ORM\JoinColumn(name: 'summary_id', referencedColumnName: 'summary_id', nullable: false, onDelete: 'CASCADE')]
     private ?Summary $summary;
 
     public function getId(): int

@@ -41,6 +41,17 @@ class SodchGetAllSummariesCommand extends Command
 
         $summaryDate = \DateTime::createFromFormat('Y-m-d', $this->parameterBag->get('sodch_get_summary_list_from'));
 
+        $connection = $this->entityManager->getConnection();
+        $connection->beginTransaction();
+
+        try {
+            $statement = $connection->prepare('delete from current_summary_list where SUMMARY_ID is not null');
+            $statement->executeStatement();
+            $connection->commit();
+        } catch (Throwable $e) {
+            $connection->rollBack();
+        }
+
         while ($summaryDate < (new DateTimeImmutable('previous day'))) {
             try {
                 $this->saveCurrentSummaryList(
@@ -54,6 +65,19 @@ class SodchGetAllSummariesCommand extends Command
             }
 
             $summaryDate->modify('+1 day');
+        }
+
+        try {
+            $connection->beginTransaction();
+
+            $statement = $connection->prepare(
+                'delete from SUMMARY_LIST where SUMMARY_ID in (select summary_id from summaries_diff)'
+            );
+            $statement->executeStatement();
+
+            $connection->commit();
+        } catch (Throwable $e) {
+            $connection->rollBack();
         }
 
         return Command::SUCCESS;
