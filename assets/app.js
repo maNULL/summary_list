@@ -1,12 +1,18 @@
-/*
- * Welcome to your app's main JavaScript file!
- *
- * We recommend including the built version of this JavaScript file
- * (and its CSS file) in your base layout (base.html.twig).
- */
-
-// any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.css'
+import 'leaflet/dist/leaflet.css'
 
-// start the Stimulus application
-import './bootstrap'
+import L from 'leaflet'
+
+const url = 'http://sodch-geofront.it.mvd.ru/osm_tiles/{z}/{x}/{y}.png'
+
+const tileLayer = L.tileLayer(url, { maxZoom: 18 })
+
+const map = L.map('map', {
+  center: [44.8632577, 43.4406913],
+  crs: L.CRS.EPSG3857,
+  zoom: 8,
+  zoomControl: true,
+  preferCanvas: false,
+  layers: [tileLayer],
+})
+
