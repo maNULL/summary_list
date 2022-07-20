@@ -25,10 +25,18 @@ class MapElementRepository extends ServiceEntityRepository
 
     public function getCrimes(): array
     {
-        return $this->createQueryBuilder('m')
-                    ->select('m.id', 'm.latitude', 'm.longitude')
-                    ->getQuery()
-                    ->getResult();
+        $qb = $this->createQueryBuilder('m')
+                   ->select('m.type', 'm.id', 'm.latitude', 'm.longitude')
+                   ->getQuery()
+                   ->getArrayResult();
+
+        $result = [];
+
+        foreach ($qb as $item) {
+            $result[$item['type']][] = $item;
+        }
+
+        return $result;
     }
 
 //    /**

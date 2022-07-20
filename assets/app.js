@@ -6,19 +6,20 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'sidebar-v2/css/leaflet-sidebar.min.css'
 import './styles/app.css'
 
-// import defaultIcon from 'leaflet/dist/images/marker-icon.png'
 import L from 'leaflet'
 import 'leaflet.markercluster'
+import 'leaflet.markercluster.layersupport'
 import 'leaflet-draw'
 import 'sidebar-v2/js/leaflet-sidebar'
 import axios from 'axios'
+import LayerControlButton from './LayerControlButton'
 import { RedMarker } from './icons'
 
 const url = 'http://sodch-geofront.it.mvd.ru/osm_tiles/{z}/{x}/{y}.png'
 
 const tileLayer = L.tileLayer(url, { maxZoom: 18 })
 
-const crimeLayer = L.markerClusterGroup({
+const mcgLayerSupportGroup = L.markerClusterGroup.layerSupport({
   spiderfyOnMaxZoom: true,
   showCoverageOnHover: false,
   zoomToBoundsOnClick: true,
@@ -30,14 +31,22 @@ const map = L.map('map', {
   zoom: 8,
   zoomControl: true,
   preferCanvas: false,
-  layers: [tileLayer, crimeLayer],
+  layers: [tileLayer, mcgLayerSupportGroup],
 })
 
+const layerControl = L.control.layers({}, {}, { collapsed: false }).addTo(map)
+
+document
+  .getElementsByClassName('leaflet-control-layers')[0]
+  .style
+  .visibility = 'hidden'
+
+LayerControlButton({ position: 'topleft' }).addTo(map)
+
 const sidebar = L.control.sidebar('sidebar').addTo(map)
-// sidebar.open('home');
 
 const getElementById = (e) => {
-  let id = e.target.element_id
+  let id = e.target.summaryId
 
   axios
     .get(`/api/crimes/${id}`)
@@ -56,22 +65,28 @@ const getElementById = (e) => {
 axios
   .get('/api/crimes')
   .then(function (response) {
-    const data = response.data
+    Object
+      .keys(response.data)
+      .forEach(
+        (key) => {
+          const layerGroup = L.layerGroup(
+            response.data[key].map(e => {
+              const marker = L.marker(
+                L.latLng(e.latitude, e.longitude), {
+                  title: `ID = ${e.id}`,
+                  icon: RedMarker,
+                },
+              )
 
-    for (let i = 0; i < data.length; i++) {
-      const location = L.latLng(data[i].latitude, data[i].longitude)
-      const title = data[i].id
+              marker.summaryId = e.id
+              marker.on('click', getElementById)
 
-      const marker = L
-        .marker(
-          location, {
-            title: title,
-            icon: RedMarker,
-          },
-        )
-      marker.element_id = data[i].id
-      marker.on('click', getElementById)
-      crimeLayer.addLayer(marker)
-    }
+              return marker
+            }),
+          )
+
+          mcgLayerSupportGroup.checkIn(layerGroup)
+          layerControl.addOverlay(layerGroup, key)
+        })
   })
 
