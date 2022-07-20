@@ -12,9 +12,17 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api')]
 class ApiController extends AbstractController
 {
-    #[Route('/get_crimes')]
-    public function index(MapElementRepository $elementRepository): Response
+    public function __construct(private readonly MapElementRepository $elementRepository) {}
+
+    #[Route('/crimes', methods: ['GET'])]
+    public function getCrimes(): Response
     {
-        return $this->json($elementRepository->getCrimes());
+        return $this->json($this->elementRepository->getCrimes());
+    }
+
+    #[Route('/crimes/{id}', methods: ['GET'])]
+    public function getCrimeById(int $id): Response
+    {
+        return $this->json($this->elementRepository->find($id));
     }
 }

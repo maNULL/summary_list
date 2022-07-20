@@ -3,12 +3,14 @@ import '@fortawesome/fontawesome-free/css/solid.min.css'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
+import 'sidebar-v2/css/leaflet-sidebar.min.css'
 import './styles/app.css'
 
 // import defaultIcon from 'leaflet/dist/images/marker-icon.png'
 import L from 'leaflet'
 import 'leaflet.markercluster'
 import 'leaflet-draw'
+import 'sidebar-v2/js/leaflet-sidebar'
 import axios from 'axios'
 import { RedMarker } from './icons'
 
@@ -31,8 +33,28 @@ const map = L.map('map', {
   layers: [tileLayer, crimeLayer],
 })
 
+const sidebar = L.control.sidebar('sidebar').addTo(map)
+// sidebar.open('home');
+
+const getElementById = (e) => {
+  let id = e.target.element_id
+
+  axios
+    .get(`/api/crimes/${id}`)
+    .then((response) => {
+      let content = document.getElementById('summary-info-content')
+
+      content.innerHTML = `
+          <p class="summary-type">${response.data.type}</p>
+          <p class="summary-address">${response.data.address}</p>
+          <p class="summary-memo">${response.data.memo}</p>
+      `
+      sidebar.open('summary-info')
+    })
+}
+
 axios
-  .get('/api/get_crimes')
+  .get('/api/crimes')
   .then(function (response) {
     const data = response.data
 
@@ -46,7 +68,9 @@ axios
             title: title,
             icon: RedMarker,
           },
-        ).bindPopup(title)
+        )
+      marker.element_id = data[i].id
+      marker.on('click', getElementById)
       crimeLayer.addLayer(marker)
     }
   })
