@@ -1,15 +1,14 @@
 import '@fortawesome/fontawesome-free/css/fontawesome.min.css'
 import '@fortawesome/fontawesome-free/css/solid.min.css'
 import 'leaflet/dist/leaflet.css'
-import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'sidebar-v2/css/leaflet-sidebar.min.css'
 import './styles/app.css'
 
 import L from 'leaflet'
+import { drawControl, editableLayers } from './draw'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster.layersupport'
-import 'leaflet-draw'
 import 'sidebar-v2/js/leaflet-sidebar'
 import axios from 'axios'
 import LayerControlButton from './LayerControlButton'
@@ -33,6 +32,13 @@ const map = L.map('map', {
   preferCanvas: false,
   layers: [tileLayer, mcgLayerSupportGroup],
 })
+
+map
+  .addLayer(editableLayers)
+  .addControl(drawControl)
+  .on(L.Draw.Event.CREATED, (e) =>
+    editableLayers.addLayer(e.layer),
+  )
 
 const layerControl = L.control.layers({}, {}, { collapsed: false }).addTo(map)
 
