@@ -13,7 +13,7 @@ import 'leaflet-draw'
 import 'sidebar-v2/js/leaflet-sidebar'
 import axios from 'axios'
 import LayerControlButton from './LayerControlButton'
-import { RedMarker } from './icons'
+import { customMarker } from './icons'
 
 const url = 'http://sodch-geofront.it.mvd.ru/osm_tiles/{z}/{x}/{y}.png'
 
@@ -60,11 +60,12 @@ const getElementById = (e) => {
       `
       sidebar.open('summary-info')
     })
+    .catch(error => console.log(error.data))
 }
 
 axios
   .get('/api/crimes')
-  .then(function (response) {
+  .then((response) => {
     Object
       .keys(response.data)
       .forEach(
@@ -73,8 +74,8 @@ axios
             response.data[key].map(e => {
               const marker = L.marker(
                 L.latLng(e.latitude, e.longitude), {
-                  title: `ID = ${e.id}`,
-                  icon: RedMarker,
+                  title: e.type,
+                  icon: customMarker(e.markerColor, e.markerIcon),
                 },
               )
 
