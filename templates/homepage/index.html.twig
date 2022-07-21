@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Summary Map{% endblock %}
+
+{% block body %}
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- navigation tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#summary-info" role="tab"><i class="fa fa-bars"></i></a></li>
+            </ul>
+        </div>
+
+        <!-- tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="summary-info">
+                <h1 class="sidebar-header">
+                    Выбранное происшествие
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+
+                <div id="summary-info-content">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="map" class="sidebar-map"></div>
+{% endblock %}
