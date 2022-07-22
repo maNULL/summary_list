@@ -15,12 +15,15 @@ L.Control.LayersButton = L.Control.extend({
        const leafletControlLayers = document.getElementsByClassName(
          'leaflet-control-layers')[0]
 
-       if ('hidden' === leafletControlLayers.style.visibility) {
+       const layerControlStyleVisibility = leafletControlLayers.style.visibility ||
+         'visible'
+
+       if ('hidden' === layerControlStyleVisibility) {
          leafletControlLayers.style.visibility = 'visible'
          return false
        }
 
-       if ('visible' === leafletControlLayers.style.visibility) {
+       if ('visible' === layerControlStyleVisibility) {
          leafletControlLayers.style.visibility = 'hidden'
          return false
        }

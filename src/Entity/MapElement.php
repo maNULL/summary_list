@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\MapElementRepository;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MapElementRepository::class, readOnly: true)]
@@ -26,8 +27,8 @@ class MapElement
     #[ORM\Column(type: 'string', length: 10, nullable: true)]
     public readonly string $registrationDate;
 
-    #[ORM\Column(type: 'string', length: 10, nullable: true)]
-    public readonly string $transferDate;
+    #[ORM\Column(type: 'date', nullable: true)]
+    public readonly DateTimeInterface $transferDate;
 
     #[ORM\Column(type: 'text', nullable: true)]
     public readonly string $memo;

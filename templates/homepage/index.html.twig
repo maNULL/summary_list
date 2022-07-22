@@ -7,12 +7,35 @@
         <!-- navigation tabs -->
         <div class="sidebar-tabs">
             <ul role="tablist">
-                <li><a href="#summary-info" role="tab"><i class="fa fa-bars"></i></a></li>
+                <li><a href="#summary-setting" role="tab"><i class="fa fa-gear"></i></a></li>
+                <li><a href="#summary-info" role="tab"><i class="fa fa-info"></i></a></li>
             </ul>
         </div>
 
         <!-- tab panes -->
         <div class="sidebar-content">
+            <div class="sidebar-pane" id="summary-setting">
+                <h1 class="sidebar-header">
+                    Настройки поиска
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+
+                <p>Диапазон поиска:</p>
+                <div class="date-block">
+                    <label for="summary-date-from" class="sr-only">Начальная дата</label>
+                    <input type="text" id="summary-date-from" class="datepicker">
+                </div>
+
+                <div class="date-block">
+                    <label for="summary-date-to" class="sr-only">Конечная дата</label>
+                    <input type="text" id="summary-date-to" class="datepicker">
+                </div>
+                <button id="summary-search" class="btn btn-default">
+                    <i class="fa fa-search"></i>&nbsp;
+                    Поиск
+                </button>
+            </div>
+
             <div class="sidebar-pane" id="summary-info">
                 <h1 class="sidebar-header">
                     Выбранное происшествие

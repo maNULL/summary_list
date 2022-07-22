@@ -10,8 +10,9 @@ import { drawControl, editableLayers } from './draw'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster.layersupport'
 import 'sidebar-v2/js/leaflet-sidebar'
-import axios from 'axios'
 import LayerControlButton from './LayerControlButton'
+import { endDate, startDate } from './datepicker'
+import axios from 'axios'
 import { customMarker } from './icons'
 
 const url = 'http://sodch-geofront.it.mvd.ru/osm_tiles/{z}/{x}/{y}.png'
@@ -40,16 +41,64 @@ map
     editableLayers.addLayer(e.layer),
   )
 
-const layerControl = L.control.layers({}, {}, { collapsed: false }).addTo(map)
+let baseLayers = {}
+let overlayLayers = {}
 
-document
-  .getElementsByClassName('leaflet-control-layers')[0]
-  .style
-  .visibility = 'hidden'
+let layerControl = L
+  .control
+  .layers(baseLayers, overlayLayers, { collapsed: false })
+  .addTo(map)
 
 LayerControlButton({ position: 'topleft' }).addTo(map)
 
 const sidebar = L.control.sidebar('sidebar').addTo(map)
+sidebar.open('summary-setting')
+
+const summaryDateFrom = document.getElementById('summary-date-from')
+summaryDateFrom.value = startDate.startDate.toDateString()
+
+const summaryDateTo = document.getElementById('summary-date-to')
+summaryDateTo.value = endDate.startDate.toDateString()
+
+const summarySearch = document.getElementById('summary-search')
+summarySearch.addEventListener('click', (e) => {
+  e.preventDefault()
+
+  clearLayers()
+
+  axios
+    .get('/api/crimes', {
+      params: {
+        from: summaryDateFrom.value,
+        to: summaryDateTo.value,
+      },
+    })
+    .then((response) => {
+      Object
+        .keys(response.data)
+        .forEach(
+          (key) => {
+            const layerGroup = L.layerGroup(
+              response.data[key].map(e => {
+                const marker = L.marker(
+                  L.latLng(e.latitude, e.longitude), {
+                    title: e.type,
+                    icon: customMarker(e.markerColor, e.markerIcon),
+                  },
+                )
+
+                marker.summaryId = e.id
+                marker.on('click', getElementById)
+
+                return marker
+              }),
+            )
+
+            mcgLayerSupportGroup.checkIn(layerGroup)
+            layerControl.addOverlay(layerGroup, key)
+          })
+    })
+})
 
 const getElementById = (e) => {
   let id = e.target.summaryId
@@ -69,31 +118,11 @@ const getElementById = (e) => {
     .catch(error => console.log(error.data))
 }
 
-axios
-  .get('/api/crimes')
-  .then((response) => {
-    Object
-      .keys(response.data)
-      .forEach(
-        (key) => {
-          const layerGroup = L.layerGroup(
-            response.data[key].map(e => {
-              const marker = L.marker(
-                L.latLng(e.latitude, e.longitude), {
-                  title: e.type,
-                  icon: customMarker(e.markerColor, e.markerIcon),
-                },
-              )
+const clearLayers = () => {
+  layerControl.remove(map)
 
-              marker.summaryId = e.id
-              marker.on('click', getElementById)
-
-              return marker
-            }),
-          )
-
-          mcgLayerSupportGroup.checkIn(layerGroup)
-          layerControl.addOverlay(layerGroup, key)
-        })
-  })
-
+  layerControl = L
+    .control
+    .layers(baseLayers, overlayLayers, { collapsed: false })
+    .addTo(map)
+}

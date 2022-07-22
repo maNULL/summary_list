@@ -23,7 +23,7 @@ final class Version20220719091233 extends AbstractMigration
                        sl.CREATE_DEPARTMENT as create_department,
                        s.KUSP_NUMBER,
                        to_char(s.REGISTRATION_DATE, \'DD.MM.YYYY\') as registration_date,
-                       to_char(sl.TRANSFER_DATE, \'DD.MM.YYYY\') as transfer_date,
+                       sl.TRANSFER_DATE,
                        s.accident_memo      as memo,
                        a.address_text       as address,
                        sl.SUMMARY_SECTION,

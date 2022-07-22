@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\MapElement;
+use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -23,24 +24,28 @@ class MapElementRepository extends ServiceEntityRepository
         parent::__construct($registry, MapElement::class);
     }
 
-    public function getCrimes(): array
+    public function getCrimes(DateTimeInterface $from, DateTimeInterface $to): array
     {
-        $qb = $this->createQueryBuilder('m')
-                   ->select(
-                       'm.type',
-                       'm.id',
-                       'm.latitude',
-                       'm.longitude',
-                       'm.markerColor',
-                       'm.markerIcon',
-                       'm.disclosure'
-                   )
-                   ->getQuery()
-                   ->getArrayResult();
+        $qb   = $this->createQueryBuilder('m');
+        $data = $qb
+            ->select(
+                'm.type',
+                'm.id',
+                'm.latitude',
+                'm.longitude',
+                'm.markerColor',
+                'm.markerIcon',
+                'm.disclosure'
+            )
+            ->where('m.transferDate between :from and :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->getQuery()
+            ->getResult();
 
         $result = [];
 
-        foreach ($qb as $item) {
+        foreach ($data as $item) {
             $result[$item['type']][] = $item;
         }
 
