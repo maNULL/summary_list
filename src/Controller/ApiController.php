@@ -31,6 +31,6 @@ class ApiController extends AbstractController
     #[Route('/crimes/{id}', methods: ['GET'])]
     public function getCrimeById(int $id): Response
     {
-        return $this->json($this->elementRepository->find($id));
+        return $this->json($this->elementRepository->getCrimeById($id));
     }
 }

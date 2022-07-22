@@ -52,6 +52,17 @@ class MapElementRepository extends ServiceEntityRepository
         return $result;
     }
 
+    public function getCrimeById(int $id): ?array
+    {
+        return $this
+            ->createQueryBuilder('m')
+            ->select('m.type', 'm.address', 'm.memo')
+            ->where('m.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 //    /**
 //     * @return MapElement[] Returns an array of MapElement objects
 //     */
