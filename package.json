@@ -18,10 +18,13 @@
     "dependencies": {
       "@fortawesome/fontawesome-free": "^6.1.1",
       "axios": "^0.27.2",
+      "i": "^0.3.7",
+      "js-datepicker": "^5.18.0",
       "leaflet": "^1.8.0",
       "leaflet-draw": "^1.0.4",
       "leaflet.markercluster": "^1.5.3",
       "leaflet.markercluster.layersupport": "^2.0.1",
+      "npm": "^8.15.0",
       "sidebar-v2": "^0.4.0"
     }
 }
